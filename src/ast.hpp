@@ -3,28 +3,32 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 class BaseAST {
   public:
     virtual ~BaseAST() = default;
-    virtual void Dump(std::ofstream &ofs) const = 0;
+    virtual void DumpAST(std::ofstream &ofs) const = 0;
     virtual void DumpKoopaIR(std::ofstream &ofs) const = 0;
+    virtual void DumpKoopaIR(std::stringstream &ofs) const = 0;
 };
 
 class CompUnitAST : public BaseAST {
   public:
     std::unique_ptr<BaseAST> func_def;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "CompUnitAST {";
-      func_def->Dump(ofs);
+      func_def->DumpAST(ofs);
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
-      // ofs << "CompUnitAST {";
       func_def->DumpKoopaIR(ofs);
-      // ofs << "}";
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
+      func_def->DumpKoopaIR(ofs);
     }
 
 };
@@ -35,15 +39,24 @@ class FuncDefAST : public BaseAST {
     std::string ident;
     std::unique_ptr<BaseAST> block;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "FuncDefAST {";
-      func_type->Dump(ofs);
+      func_type->DumpAST(ofs);
       ofs << ", " << ident << ", ";
-      block->Dump(ofs);
+      block->DumpAST(ofs);
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << "fun ";
+      ofs << "@main(): ";
+      func_type->DumpKoopaIR(ofs);
+      ofs << "{" << std::endl;
+      block->DumpKoopaIR(ofs);
+      ofs << "}" << std::endl;
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
       ofs << "fun ";
       ofs << "@main(): ";
       func_type->DumpKoopaIR(ofs);
@@ -58,7 +71,7 @@ class FuncTypeAST : public BaseAST {
   public:
     std::string int_str;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "FuncTypeAST {";
       ofs << int_str;
       ofs << "}";
@@ -69,19 +82,30 @@ class FuncTypeAST : public BaseAST {
         ofs << "i32 ";
       }
     }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
+      if (int_str == "int") {
+        ofs << "i32 ";
+      }
+    }
 };
 
 class BlockAST : public BaseAST {
   public:
     std::unique_ptr<BaseAST> stmt;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "BlockAST {";
-      stmt->Dump(ofs);
+      stmt->DumpAST(ofs);
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << "\%entry:" << std::endl;
+      stmt->DumpKoopaIR(ofs);
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
       ofs << "\%entry:" << std::endl;
       stmt->DumpKoopaIR(ofs);
     }
@@ -91,13 +115,20 @@ class StmtAST : public BaseAST {
   public:
     std::unique_ptr<BaseAST> number;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "StmtAST {";
-      number->Dump(ofs);
+      number->DumpAST(ofs);
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
+      std::string indent_space = "  ";
+      ofs << indent_space;
+      ofs << "ret ";
+      number->DumpKoopaIR(ofs);
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
       std::string indent_space = "  ";
       ofs << indent_space;
       ofs << "ret ";
@@ -109,13 +140,17 @@ class NumberAST : public BaseAST {
   public:
     std::string int_const;
 
-    void Dump(std::ofstream &ofs) const override {
+    void DumpAST(std::ofstream &ofs) const override {
       ofs << "NumberAST {";
       ofs << int_const;
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << int_const << std::endl;
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
       ofs << int_const << std::endl;
     }
 };

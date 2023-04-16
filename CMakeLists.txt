@@ -65,8 +65,13 @@ set(compiler_TESTS_DIR "${CMAKE_SOURCE_DIR}/tests")
 if ( compiler_TESTS_DIR STREQUAL "" )
   message(WARNING "compiler_TESTS_DIR is empty!")
 endif()
-add_custom_target(run
+add_custom_target(run_koopa
   COMMAND ${PROJECT_BINARY_DIR}/${PROJECT_NAME} -koopa ${compiler_TESTS_DIR}/hello.c -o ${compiler_TESTS_DIR}/hello.koopa
+  DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
+  WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+)
+add_custom_target(run_riscv
+  COMMAND ${PROJECT_BINARY_DIR}/${PROJECT_NAME} -riscv ${compiler_TESTS_DIR}/hello.c -o ${compiler_TESTS_DIR}/hello.riscv
   DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
   WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
 )
