@@ -59,3 +59,14 @@ set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
 add_executable(compiler ${SOURCES})
 set_target_properties(compiler PROPERTIES C_STANDARD 11 CXX_STANDARD 17)
 target_link_libraries(compiler koopa pthread dl)
+
+# run
+set(compiler_TESTS_DIR "${CMAKE_SOURCE_DIR}/tests")
+if ( compiler_TESTS_DIR STREQUAL "" )
+  message(WARNING "compiler_TESTS_DIR is empty!")
+endif()
+add_custom_target(run
+  COMMAND ${PROJECT_BINARY_DIR}/${PROJECT_NAME} -koopa ${compiler_TESTS_DIR}/hello.c -o ${compiler_TESTS_DIR}/hello.koopa
+  DEPENDS ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
+  WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+)
