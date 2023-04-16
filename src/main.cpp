@@ -22,6 +22,8 @@ int main(int argc, const char *argv[]) {
   // compiler 模式 输入文件 -o 输出文件
   assert(argc == 5);
   const char *mode = argv[1];
+  // For now, accept only -koopa
+  assert(mode[1] == 'k');
   const char *input = argv[2];
   const char *output = argv[4];
 
@@ -39,7 +41,8 @@ int main(int argc, const char *argv[]) {
   // cout << endl;
   ofstream ofs;
   ofs.open(output);
-  ast->Dump(ofs);
+  // ast->Dump(ofs);
+  ast->DumpKoopaIR(ofs);
   ofs.close();
   return 0;
 }

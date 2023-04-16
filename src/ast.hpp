@@ -8,6 +8,7 @@ class BaseAST {
   public:
     virtual ~BaseAST() = default;
     virtual void Dump(std::ofstream &ofs) const = 0;
+    virtual void DumpKoopaIR(std::ofstream &ofs) const = 0;
 };
 
 class CompUnitAST : public BaseAST {
@@ -19,6 +20,13 @@ class CompUnitAST : public BaseAST {
       func_def->Dump(ofs);
       ofs << "}";
     }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      // ofs << "CompUnitAST {";
+      func_def->DumpKoopaIR(ofs);
+      // ofs << "}";
+    }
+
 };
 
 class FuncDefAST : public BaseAST {
@@ -34,6 +42,16 @@ class FuncDefAST : public BaseAST {
       block->Dump(ofs);
       ofs << "}";
     }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << "fun ";
+      ofs << "@main(): ";
+      func_type->DumpKoopaIR(ofs);
+      ofs << "{" << std::endl;
+      block->DumpKoopaIR(ofs);
+      ofs << "}" << std::endl;
+    }
+
 };
 
 class FuncTypeAST : public BaseAST {
@@ -44,6 +62,12 @@ class FuncTypeAST : public BaseAST {
       ofs << "FuncTypeAST {";
       ofs << int_str;
       ofs << "}";
+    }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      if (int_str == "int") {
+        ofs << "i32 ";
+      }
     }
 };
 
@@ -56,6 +80,11 @@ class BlockAST : public BaseAST {
       stmt->Dump(ofs);
       ofs << "}";
     }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << "\%entry:" << std::endl;
+      stmt->DumpKoopaIR(ofs);
+    }
 };
 
 class StmtAST : public BaseAST {
@@ -67,6 +96,13 @@ class StmtAST : public BaseAST {
       number->Dump(ofs);
       ofs << "}";
     }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      std::string indent_space = "  ";
+      ofs << indent_space;
+      ofs << "ret ";
+      number->DumpKoopaIR(ofs);
+    }
 };
 
 class NumberAST : public BaseAST {
@@ -77,5 +113,9 @@ class NumberAST : public BaseAST {
       ofs << "NumberAST {";
       ofs << int_const;
       ofs << "}";
+    }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+      ofs << int_const << std::endl;
     }
 };
