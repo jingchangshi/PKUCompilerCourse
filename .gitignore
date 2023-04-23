@@ -2,4 +2,6 @@
 /build
 tests/*.koopa
 tests/*.riscv
+tests/*.ast
 *.vim
+.vscode/

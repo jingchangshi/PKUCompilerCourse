@@ -113,11 +113,16 @@ class BlockAST : public BaseAST {
 
 class StmtAST : public BaseAST {
   public:
-    std::unique_ptr<BaseAST> number;
+    std::unique_ptr<BaseAST> exp;
+    std::string number;
 
     void DumpAST(std::ofstream &ofs) const override {
       ofs << "StmtAST {";
-      number->DumpAST(ofs);
+      if (exp) {
+        exp->DumpAST(ofs);
+      } else {
+        ofs << number;
+      }
       ofs << "}";
     }
 
@@ -125,32 +130,100 @@ class StmtAST : public BaseAST {
       std::string indent_space = "  ";
       ofs << indent_space;
       ofs << "ret ";
-      number->DumpKoopaIR(ofs);
+      // ofs << number << std::endl;
     }
 
     void DumpKoopaIR(std::stringstream &ofs) const override {
       std::string indent_space = "  ";
       ofs << indent_space;
       ofs << "ret ";
-      number->DumpKoopaIR(ofs);
+      // ofs << number << std::endl;
     }
 };
 
-class NumberAST : public BaseAST {
+class ExpAST : public BaseAST {
   public:
-    std::string int_const;
+    std::unique_ptr<BaseAST> unaryexp;
 
     void DumpAST(std::ofstream &ofs) const override {
-      ofs << "NumberAST {";
-      ofs << int_const;
+      ofs << "ExpAST {";
+      unaryexp->DumpAST(ofs);
       ofs << "}";
     }
 
     void DumpKoopaIR(std::ofstream &ofs) const override {
-      ofs << int_const << std::endl;
     }
 
     void DumpKoopaIR(std::stringstream &ofs) const override {
-      ofs << int_const << std::endl;
     }
+
 };
+
+class UnaryExpAST : public BaseAST {
+  public:
+    std::unique_ptr<BaseAST> primaryexp;
+    std::unique_ptr<BaseAST> unaryop;
+    std::unique_ptr<BaseAST> unaryexp;
+
+    void DumpAST(std::ofstream &ofs) const override {
+      ofs << "UnaryExpAST {";
+      if (primaryexp) {
+        primaryexp->DumpAST(ofs);
+      } else {
+        unaryop->DumpAST(ofs);
+        unaryexp->DumpAST(ofs);
+      }
+      ofs << "}";
+    }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
+    }
+
+};
+
+class PrimaryExpAST : public BaseAST {
+  public:
+    std::string number;
+    std::unique_ptr<BaseAST> exp;
+
+    void DumpAST(std::ofstream &ofs) const override {
+      ofs << "PrimaryExpAST {";
+      if (exp) {
+        ofs << "(";
+        exp->DumpAST(ofs);
+        ofs << ")";
+      } else {
+        ofs << number;
+      }
+      ofs << "}";
+    }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
+    }
+
+};
+
+class UnaryOpAST : public BaseAST {
+  public:
+    std::string op;
+
+    void DumpAST(std::ofstream &ofs) const override {
+      ofs << "UnaryOpAST {";
+      ofs << op;
+      ofs << "}";
+    }
+
+    void DumpKoopaIR(std::ofstream &ofs) const override {
+    }
+
+    void DumpKoopaIR(std::stringstream &ofs) const override {
+    }
+
+};
+
